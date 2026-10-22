@@ -1,0 +1,44 @@
+{
+  "skill_name": "ingest",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Dry-run only; do not write any Wiki file. I want to ingest one Chinese service reliability note into Leon's Wiki. It contains (a) an explanation that delayed event ingestion makes operational dashboards stale, (b) a five-step incident-triage SOP with a 15-minute threshold and one exception for maintenance windows, (c) a Markdown evidence table, and (d) a reusable blockquoted Chinese prompt template. Explain the semantic split, dedup/placement order, lossless handling, and when you would serialize the plan.",
+      "expected_output": "A source-first dry-run that separates reusable identities without thin-card fragmentation, preserves the meaningful table and Chinese prompt, and defers navigation/runtime mechanics until the semantic decisions are stable.",
+      "files": [],
+      "expectations": [
+        "Does not preload the full SYSTEM, Registry, or MOC tree before understanding the material.",
+        "Separates the mechanism from the operational SOP only if each remains independently reusable, while keeping the threshold and maintenance-window exception with the decision they qualify.",
+        "Preserves the Markdown table and Chinese prompt template as lossless anchors rather than silently paraphrasing them away.",
+        "Performs candidate retrieval and body-level dedup per semantic unit; similarity alone does not decide enrich.",
+        "Introduces classification/placement only after semantic units stabilize and serializes under the profile WorkRoot via the snapshot/plan reference."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Dry-run only; do not execute. A new source adds two exceptions and a better decision tree to an existing card titled '告警升级判定 SOP'. The card already has a MY-EXPERIENCE callout. Search finds it as the same knowledge lineage, but no existing MOC heading is clearly valid for a new placement. Describe the correct enrich proposal and the conditions that must block execution.",
+      "expected_output": "A coherent enrich proposal that keeps card identity and human experience intact, uses existing placement only when valid, and blocks rather than inventing taxonomy.",
+      "files": [],
+      "expectations": [
+        "Chooses enrich based on same knowledge identity and a hash-pinned same_source candidate, not merely similarity.",
+        "Recompiles a complete coherent body whose first H1 remains exactly '# 告警升级判定 SOP'.",
+        "Preserves every existing MY-EXPERIENCE block byte-for-byte and does not append a chronological dump.",
+        "Keeps sources non-empty if a sources patch is proposed.",
+        "Uses needs_governance_review and blocks execution if no valid existing MOC can be verified; it does not create or rename MOCs/headings."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I am on Device B. I put ingest_plan.json in D:\\example-vault\\_ops and was going to run run_ingest_pipeline.ps1 with -Device B -VaultRoot D:\\example-vault -WorkRoot D:\\example-vault\\_ops\\staging. Existing _ops files must stay untouched. Review this handoff and give the corrected R3 setup/transaction approach. Do not run it.",
+      "expected_output": "A fail-closed correction that moves all process artifacts outside Nutstore, uses the host-bound profile and shared skill, and leaves existing _ops content untouched except for the exact transient lock during a real transaction.",
+      "files": [],
+      "expectations": [
+        "Rejects the plan and WorkRoot locations because they are inside or overlap the Vault.",
+        "Explains that Device, VaultRoot, WorkRoot, and Python come from a one-time host-bound local profile and cannot be overridden on the transaction command.",
+        "Places plan, snapshot, staging, backup, journal, reports, runtime, and index cwd outside the Vault.",
+        "Identifies _ops/governance.lock.json as the only transient Vault process-file exception and leaves all existing _ops content untouched.",
+        "Uses setup-device.ps1 once and then run_ingest_pipeline.ps1 with only plan, SyncConfirmed, and optional recovery/index switches."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,237 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.leon/wiki/ingest-plan-r3.schema.json",
+  "title": "Leon's Wiki Ingest Plan R3 (schema 1.0)",
+  "description": "Untrusted AI proposal. It never contains a final zone_id, business directory, target path, or MOC/Zone creation command. Supports omitted_anchors exemption channel.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "plan_id", "created_at", "base", "operations"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "plan_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "created_at": {"type": "string", "format": "date-time"},
+    "proposal_notes": {"type": "string", "maxLength": 4000},
+    "base": {"$ref": "#/$defs/base"},
+    "operations": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 30,
+      "items": {
+        "oneOf": [
+          {"$ref": "#/$defs/create_operation"},
+          {"$ref": "#/$defs/enrich_operation"},
+          {"$ref": "#/$defs/review_operation"}
+        ]
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[A-Fa-f0-9]{64}$"
+    },
+    "omitted_anchor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["anchor_type", "snippet_hash", "rationale"],
+      "properties": {
+        "anchor_type": {
+          "type": "string",
+          "enum": ["code_block", "table", "prompt_template"]
+        },
+        "snippet_hash": {"$ref": "#/$defs/sha256"},
+        "rationale": {"type": "string", "minLength": 10, "maxLength": 2000}
+      }
+    },
+    "base": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["registry_sha256", "system_sha256", "materials"],
+      "properties": {
+        "registry_sha256": {"$ref": "#/$defs/sha256"},
+        "system_sha256": {"$ref": "#/$defs/sha256"},
+        "materials": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/material"}
+        }
+      }
+    },
+    "material": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["uri", "local_path", "sha256"],
+      "properties": {
+        "uri": {"type": "string", "minLength": 1, "maxLength": 2000},
+        "local_path": {"type": "string", "minLength": 1, "maxLength": 2000},
+        "sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "classification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["zone", "number"],
+      "properties": {
+        "zone": {"type": "string", "enum": ["A", "C", "D", "F", "G", "P"]},
+        "number": {"type": "integer", "minimum": 0, "maximum": 99},
+        "rationale": {"type": "string", "minLength": 1, "maxLength": 2000}
+      }
+    },
+    "parent_create": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["moc_title", "heading", "expected_sha256"],
+      "properties": {
+        "moc_title": {"type": "string", "minLength": 1, "maxLength": 240},
+        "heading": {"type": "string", "pattern": "^#{1,6}\\s+\\S", "maxLength": 500},
+        "expected_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "parent_existing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["moc_title", "expected_sha256"],
+      "properties": {
+        "moc_title": {"type": "string", "minLength": 1, "maxLength": 240},
+        "expected_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "expected_sha256", "relation"],
+      "properties": {
+        "title": {"type": "string", "minLength": 1, "maxLength": 240},
+        "expected_sha256": {"$ref": "#/$defs/sha256"},
+        "similarity": {"type": "number", "minimum": 0, "maximum": 1},
+        "relation": {"type": "string", "enum": ["same_source", "related", "false_positive"]},
+        "rationale": {"type": "string", "minLength": 1, "maxLength": 2000}
+      }
+    },
+    "dedup_create": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["decision", "candidates"],
+      "properties": {
+        "decision": {"const": "create"},
+        "candidates": {
+          "type": "array",
+          "maxItems": 5,
+          "items": {"$ref": "#/$defs/candidate"}
+        }
+      }
+    },
+    "dedup_enrich": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["decision", "candidates"],
+      "properties": {
+        "decision": {"const": "enrich"},
+        "candidates": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 5,
+          "items": {"$ref": "#/$defs/candidate"}
+        }
+      }
+    },
+    "create_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "tags", "sources", "risk_level", "confidence", "created", "updated"],
+      "properties": {
+        "type": {"type": "string", "enum": ["concept", "principle", "sop", "checklist", "model", "case", "playbook"]},
+        "tags": {"type": "array", "items": {"type": "string", "minLength": 1, "maxLength": 120}},
+        "sources": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1, "maxLength": 2000}},
+        "domain": {"type": "string", "minLength": 1, "maxLength": 120},
+        "risk_level": {"type": "string", "enum": ["none", "low", "medium", "high"]},
+        "confidence": {"type": "string", "enum": ["high", "medium", "low"]},
+        "created": {"type": "string", "format": "date"},
+        "updated": {"type": "string", "format": "date"}
+      }
+    },
+    "metadata_patch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["updated"],
+      "properties": {
+        "tags": {"type": "array", "items": {"type": "string", "minLength": 1, "maxLength": 120}},
+        "sources": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1, "maxLength": 2000}},
+        "domain": {"type": "string", "minLength": 1, "maxLength": 120},
+        "risk_level": {"type": "string", "enum": ["none", "low", "medium", "high"]},
+        "confidence": {"type": "string", "enum": ["high", "medium", "low"]},
+        "updated": {"type": "string", "format": "date"}
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "expected_sha256"],
+      "properties": {
+        "title": {"type": "string", "minLength": 1, "maxLength": 240},
+        "expected_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "create_operation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["op_id", "action", "classification", "title", "parent", "metadata", "body", "dedup"],
+      "properties": {
+        "op_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$", "maxLength": 80},
+        "action": {"const": "create"},
+        "classification": {"$ref": "#/$defs/classification"},
+        "title": {"type": "string", "minLength": 1, "maxLength": 240},
+        "parent": {"$ref": "#/$defs/parent_create"},
+        "metadata": {"$ref": "#/$defs/create_metadata"},
+        "body": {"type": "string", "minLength": 1},
+        "dedup": {"$ref": "#/$defs/dedup_create"},
+        "omitted_anchors": {
+          "type": "array",
+          "maxItems": 20,
+          "items": {"$ref": "#/$defs/omitted_anchor"}
+        }
+      }
+    },
+    "enrich_operation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["op_id", "action", "classification", "target", "parent", "metadata_patch", "body", "dedup"],
+      "properties": {
+        "op_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$", "maxLength": 80},
+        "action": {"const": "enrich"},
+        "classification": {"$ref": "#/$defs/classification"},
+        "target": {"$ref": "#/$defs/target"},
+        "parent": {"$ref": "#/$defs/parent_existing"},
+        "metadata_patch": {"$ref": "#/$defs/metadata_patch"},
+        "body": {"type": "string", "minLength": 1},
+        "dedup": {"$ref": "#/$defs/dedup_enrich"},
+        "omitted_anchors": {
+          "type": "array",
+          "maxItems": 20,
+          "items": {"$ref": "#/$defs/omitted_anchor"}
+        }
+      }
+    },
+    "review_operation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["op_id", "action", "title", "reason", "details"],
+      "properties": {
+        "op_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$", "maxLength": 80},
+        "action": {"const": "needs_governance_review"},
+        "title": {"type": "string", "minLength": 1, "maxLength": 240},
+        "reason": {
+          "type": "string",
+          "enum": ["no_existing_moc", "ambiguous_classification", "ambiguous_dedup", "other"]
+        },
+        "details": {"type": "string", "minLength": 1, "maxLength": 4000},
+        "classification": {"$ref": "#/$defs/classification"}
+      }
+    }
+  }
+}

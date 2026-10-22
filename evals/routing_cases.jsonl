@@ -1,0 +1,11 @@
+{"id":"route-positive-01","class":"positive","query":"把这份项目复盘资料 ingest 进 Leons Wiki，先理解再按知识单元拆卡。","expect_load":true,"reason":"Explicit raw-material ingestion into Leon's Wiki."}
+{"id":"route-positive-02","class":"positive","query":"这份新 SOP 和现有卡片可能重复，帮我判断 enrich 还是 create 并完成 ingest。","expect_load":true,"reason":"Ingest with dedup and enrich/create judgment."}
+{"id":"route-positive-03","class":"positive","query":"上次 ingest 把一个完整因果链拆成了很多薄卡，重新编译这份材料。","expect_load":true,"reason":"Redo Ingest because semantic split/card quality was poor."}
+{"id":"route-positive-04","class":"positive","query":"把这个 PDF 里的流程图、表格和说明编译成 Leons Wiki 可复用知识卡。","expect_load":true,"reason":"Multimodal raw material being compiled into Wiki cards."}
+{"id":"route-negative-01","class":"negative","query":"帮我查一下 Leons Wiki 里关于项目版本管理的已有知识。","expect_load":false,"reason":"Retrieval only; no ingestion requested."}
+{"id":"route-negative-02","class":"negative","query":"给 Leons Wiki 的 C 区重新设计一套 MOC 层级。","expect_load":false,"reason":"Standalone taxonomy/MOC governance work."}
+{"id":"route-negative-03","class":"negative","query":"修一下 ingest_executor.py 里的 rollback bug。","expect_load":false,"reason":"Executor debugging, not semantic ingestion."}
+{"id":"route-negative-04","class":"negative","query":"把 Registry rebuild 改成增量更新。","expect_load":false,"reason":"Deterministic infrastructure maintenance."}
+{"id":"route-neighbor-01","class":"neighbor_confusion","query":"审计 Ingest 的 lock、TTL、rollback 和 commit 顺序是否安全。","expect_load":false,"reason":"Shares Ingest vocabulary but asks for transaction-layer code audit."}
+{"id":"route-neighbor-02","class":"neighbor_confusion","query":"现有两张卡应该合并还是拆分？没有新的 raw material。","expect_load":false,"reason":"Existing-Wiki governance/refactoring without an ingest source."}
+{"id":"route-neighbor-03","class":"neighbor_confusion","query":"升级 _SYSTEM.md 的 Zone 分类规则，然后批量迁移旧卡。","expect_load":false,"reason":"Upgrade/taxonomy migration is a separate workflow."}

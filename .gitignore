@@ -1,0 +1,30 @@
+# Python runtime/cache
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.coverage
+
+# Credentials, local profiles and transaction outputs
+.env
+.env.*
+!.env.example
+**/ingest-device.json
+**/ingest_plan.json
+**/snapshot.json
+**/governance.lock.json
+**/staging/
+**/backup/
+**/journal/
+*.log
+
+# Local materials and private navigation; do not commit production Vaults
+private/
+local/
+work/
+fixtures-private/
+*taxonomy.private*
+*.private.md
+.DS_Store
+Thumbs.db
